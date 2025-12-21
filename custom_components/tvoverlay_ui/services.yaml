@@ -124,7 +124,8 @@ notify_fixed:
         text:
     id:
       name: Notification ID
-      description: Unique ID for this notification (for updates/clearing).
+      description: Unique ID for this notification (required for updates/clearing).
+      required: true
       example: "weather"
       selector:
         text:
