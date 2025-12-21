@@ -62,7 +62,7 @@ Copy `custom_components/tvoverlay_ui` to your HA config directory and restart.
 |:-----|:---------|
 | **Switches** | Display Clock, Display Notifications, Display Fixed Notifications, Pixel Shift, Debug Mode |
 | **Sliders** | Clock Visibility, Overlay Visibility, Fixed Notifications Visibility, Notification Duration |
-| **Selects** | Notification Layout, Default Corner, Default Shape |
+| **Selects** | Preset, Hot Corner, Default Shape |
 | **Sensors** | Active Fixed Notifications |
 
 ---

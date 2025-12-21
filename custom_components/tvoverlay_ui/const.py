@@ -3,18 +3,16 @@ from typing import Final
 
 DOMAIN: Final = "tvoverlay_ui"
 
-# Config keys
-CONF_HOST: Final = "host"
-CONF_PORT: Final = "port"
-CONF_NAME: Final = "name"
-
 # Defaults
 DEFAULT_PORT: Final = 5001
 DEFAULT_NAME: Final = "TvOverlay"
+DEFAULT_TIMEOUT: Final = 10
+DEFAULT_SCAN_INTERVAL: Final = 30
 
 # API Endpoints
 ENDPOINT_NOTIFY: Final = "/notify"
 ENDPOINT_NOTIFY_FIXED: Final = "/notify_fixed"
+ENDPOINT_GET: Final = "/get"
 ENDPOINT_SET_OVERLAY: Final = "/set/overlay"
 ENDPOINT_SET_NOTIFICATIONS: Final = "/set/notifications"
 ENDPOINT_SET_SETTINGS: Final = "/set/settings"
@@ -25,11 +23,11 @@ CORNER_BOTTOM_END: Final = "bottom_end"
 CORNER_TOP_START: Final = "top_start"
 CORNER_TOP_END: Final = "top_end"
 
-VALID_CORNERS: Final = [
-    CORNER_BOTTOM_START,
-    CORNER_BOTTOM_END,
+VALID_CORNERS: Final[list[str]] = [
     CORNER_TOP_START,
     CORNER_TOP_END,
+    CORNER_BOTTOM_START,
+    CORNER_BOTTOM_END,
 ]
 
 # Fixed notification shapes
@@ -37,14 +35,20 @@ SHAPE_CIRCLE: Final = "circle"
 SHAPE_ROUNDED: Final = "rounded"
 SHAPE_RECTANGULAR: Final = "rectangular"
 
-VALID_SHAPES: Final = [
+VALID_SHAPES: Final[list[str]] = [
     SHAPE_CIRCLE,
     SHAPE_ROUNDED,
     SHAPE_RECTANGULAR,
 ]
 
 # Platforms
-PLATFORMS: Final = ["switch", "number", "button", "sensor", "select"]
+PLATFORMS: Final[list[str]] = [
+    "binary_sensor",
+    "number",
+    "select",
+    "sensor",
+    "switch",
+]
 
 # Storage
 STORAGE_KEY: Final = "tvoverlay_ui_notification_ids"
@@ -61,14 +65,12 @@ ATTR_HOST: Final = "host"
 ATTR_TITLE: Final = "title"
 ATTR_MESSAGE: Final = "message"
 ATTR_SOURCE: Final = "source"
-ATTR_VIDEO: Final = "video"
 ATTR_CORNER: Final = "corner"
 ATTR_DURATION: Final = "duration"
 ATTR_ID: Final = "id"
 ATTR_VISIBLE: Final = "visible"
 ATTR_SHAPE: Final = "shape"
 ATTR_EXPIRATION: Final = "expiration"
-ATTR_CLEAR_ALL: Final = "clear_all"
 
 # Icon attributes
 ATTR_SMALL_ICON: Final = "smallIcon"
@@ -83,7 +85,7 @@ ATTR_MEDIA_URL: Final = "mediaUrl"
 ATTR_ICON: Final = "icon"
 ATTR_ICON_COLOR: Final = "iconColor"
 
-# Color attributes (RGB arrays from color picker)
+# Color attributes
 ATTR_MESSAGE_COLOR: Final = "messageColor"
 ATTR_BORDER_COLOR: Final = "borderColor"
 ATTR_BACKGROUND_COLOR: Final = "backgroundColor"

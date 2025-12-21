@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -17,9 +18,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up TvOverlay sensors."""
     data = hass.data[DOMAIN][entry.entry_id]
-    device_name: str = data["name"]
+    coordinator = data["coordinator"]
+    device_name = data["name"]
 
     sensor = TvOverlayNotificationIdsSensor(
+        coordinator=coordinator,
         entry_id=entry.entry_id,
         device_name=device_name,
         entry_data=data,
@@ -34,14 +37,17 @@ class TvOverlayNotificationIdsSensor(SensorEntity):
     _attr_has_entity_name = True
     _attr_translation_key = "active_notification_ids"
     _attr_icon = "mdi:identifier"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
         self,
+        coordinator,
         entry_id: str,
         device_name: str,
         entry_data: dict,
     ) -> None:
         """Initialize the sensor."""
+        self._coordinator = coordinator
         self._entry_id = entry_id
         self._device_name = device_name
         self._entry_data = entry_data
@@ -55,6 +61,7 @@ class TvOverlayNotificationIdsSensor(SensorEntity):
             name=self._device_name,
             manufacturer="TvOverlay",
             model="Android TV Overlay",
+            sw_version=self._coordinator.device_version,
         )
 
     @property

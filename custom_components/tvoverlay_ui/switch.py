@@ -11,12 +11,12 @@ from homeassistant.components.switch import (
     SwitchEntityDescription,
 )
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .api import TvOverlayApiClient
 from .const import DOMAIN
+from .entity import TvOverlayEntity
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,54 +26,60 @@ class TvOverlaySwitchEntityDescription(SwitchEntityDescription):
     """Describes TvOverlay switch entity."""
 
     api_key: str
-    endpoint: str  # "notifications" or "settings"
+    endpoint: str  # "notifications", "overlay", or "settings"
+    data_key: str  # Key in coordinator data
 
 
 SWITCH_DESCRIPTIONS: tuple[TvOverlaySwitchEntityDescription, ...] = (
     TvOverlaySwitchEntityDescription(
         key="display_clock",
         translation_key="display_clock",
-        name="Display Clock",
         icon="mdi:clock-outline",
         device_class=SwitchDeviceClass.SWITCH,
+        entity_category=EntityCategory.CONFIG,
         api_key="clockOverlayVisibility",
         endpoint="overlay",
+        data_key="overlay",
     ),
     TvOverlaySwitchEntityDescription(
         key="display_notifications",
         translation_key="display_notifications",
-        name="Display Notifications",
         icon="mdi:message-badge-outline",
         device_class=SwitchDeviceClass.SWITCH,
+        entity_category=EntityCategory.CONFIG,
         api_key="displayNotifications",
         endpoint="notifications",
+        data_key="notifications",
     ),
     TvOverlaySwitchEntityDescription(
         key="display_fixed_notifications",
         translation_key="display_fixed_notifications",
-        name="Display Fixed Notifications",
         icon="mdi:pin-outline",
         device_class=SwitchDeviceClass.SWITCH,
+        entity_category=EntityCategory.CONFIG,
         api_key="displayFixedNotifications",
         endpoint="notifications",
+        data_key="notifications",
     ),
     TvOverlaySwitchEntityDescription(
         key="pixel_shift",
         translation_key="pixel_shift",
-        name="Pixel Shift",
         icon="mdi:television-shimmer",
         device_class=SwitchDeviceClass.SWITCH,
+        entity_category=EntityCategory.CONFIG,
         api_key="pixelShift",
         endpoint="settings",
+        data_key="settings",
     ),
     TvOverlaySwitchEntityDescription(
         key="debug_mode",
         translation_key="debug_mode",
-        name="Debug Mode",
         icon="mdi:bug-outline",
         device_class=SwitchDeviceClass.SWITCH,
+        entity_category=EntityCategory.DIAGNOSTIC,
         api_key="displayDebug",
         endpoint="settings",
+        data_key="settings",
     ),
 )
 
@@ -85,15 +91,16 @@ async def async_setup_entry(
 ) -> None:
     """Set up TvOverlay switches."""
     data = hass.data[DOMAIN][entry.entry_id]
-    client: TvOverlayApiClient = data["client"]
-    device_name: str = data["name"]
+    coordinator = data["coordinator"]
+    device_name = data["name"]
 
     entities = [
         TvOverlaySwitch(
-            client=client,
+            coordinator=coordinator,
             entry_id=entry.entry_id,
             device_name=device_name,
             description=description,
+            client=data["client"],
         )
         for description in SWITCH_DESCRIPTIONS
     ]
@@ -101,36 +108,38 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-class TvOverlaySwitch(SwitchEntity):
+class TvOverlaySwitch(TvOverlayEntity, SwitchEntity):
     """Representation of a TvOverlay switch."""
 
     entity_description: TvOverlaySwitchEntityDescription
-    _attr_has_entity_name = True
 
     def __init__(
         self,
-        client: TvOverlayApiClient,
+        coordinator,
         entry_id: str,
         device_name: str,
         description: TvOverlaySwitchEntityDescription,
+        client,
     ) -> None:
         """Initialize the switch."""
+        super().__init__(coordinator, entry_id, device_name)
         self.entity_description = description
         self._client = client
-        self._entry_id = entry_id
-        self._device_name = device_name
         self._attr_unique_id = f"{entry_id}_{description.key}"
-        self._attr_is_on = True  # Assume on by default
 
     @property
-    def device_info(self) -> DeviceInfo:
-        """Return device info."""
-        return DeviceInfo(
-            identifiers={(DOMAIN, self._entry_id)},
-            name=self._device_name,
-            manufacturer="TvOverlay",
-            model="Android TV Overlay",
-        )
+    def is_on(self) -> bool | None:
+        """Return true if the switch is on."""
+        if self.coordinator.data is None:
+            return None
+        data_section = self.coordinator.data.get(self.entity_description.data_key, {})
+        value = data_section.get(self.entity_description.api_key)
+        if value is None:
+            return None
+        # Clock visibility uses 0-95 range instead of boolean
+        if self.entity_description.key == "display_clock":
+            return value > 0
+        return bool(value)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the switch on."""
@@ -158,8 +167,7 @@ class TvOverlaySwitch(SwitchEntity):
             success = await self._client.set_settings(data)
 
         if success:
-            self._attr_is_on = state
-            self.async_write_ha_state()
+            await self.coordinator.async_request_refresh()
         else:
             _LOGGER.error(
                 "Failed to set %s to %s",

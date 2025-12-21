@@ -72,9 +72,9 @@
         "name": "Notification Duration"
       }
     },
-    "button": {
-      "clear_notifications": {
-        "name": "Clear Notifications"
+    "binary_sensor": {
+      "connectivity": {
+        "name": "Connectivity"
       }
     },
     "sensor": {
@@ -83,16 +83,8 @@
       }
     },
     "select": {
-      "notification_layout": {
-        "name": "Notification Layout",
-        "state": {
-          "Default": "Default",
-          "Minimalist": "Minimalist",
-          "Icon Only": "Icon Only"
-        }
-      },
-      "default_corner": {
-        "name": "Default Corner",
+      "hot_corner": {
+        "name": "Hot Corner",
         "state": {
           "top_start": "Top Left",
           "top_end": "Top Right",
@@ -232,6 +224,20 @@
           "description": "The ID of the fixed notification to clear."
         }
       }
+    }
+  },
+  "exceptions": {
+    "id_required": {
+      "message": "Notification ID is required. Please provide a unique ID to identify this notification."
+    },
+    "device_not_found": {
+      "message": "Device not found. Please select a configured device or provide a valid host."
+    },
+    "notification_failed": {
+      "message": "Failed to send notification to the device."
+    },
+    "clear_failed": {
+      "message": "Failed to clear the notification."
     }
   }
 }
