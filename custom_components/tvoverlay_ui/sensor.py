@@ -1,6 +1,8 @@
 """Sensor platform for TvOverlay."""
 from __future__ import annotations
 
+import socket
+
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
@@ -21,14 +23,26 @@ async def async_setup_entry(
     coordinator = data["coordinator"]
     device_name = data["name"]
 
-    sensor = TvOverlayNotificationIdsSensor(
-        coordinator=coordinator,
-        entry_id=entry.entry_id,
-        device_name=device_name,
-        entry_data=data,
-    )
+    sensors = [
+        TvOverlayNotificationIdsSensor(
+            coordinator=coordinator,
+            entry_id=entry.entry_id,
+            device_name=device_name,
+            entry_data=data,
+        ),
+        TvOverlayHostnameSensor(
+            coordinator=coordinator,
+            entry_id=entry.entry_id,
+            device_name=device_name,
+        ),
+        TvOverlayResolvedIpSensor(
+            coordinator=coordinator,
+            entry_id=entry.entry_id,
+            device_name=device_name,
+        ),
+    ]
 
-    async_add_entities([sensor])
+    async_add_entities(sensors)
 
 
 class TvOverlayNotificationIdsSensor(SensorEntity):
@@ -57,11 +71,12 @@ class TvOverlayNotificationIdsSensor(SensorEntity):
     def device_info(self) -> DeviceInfo:
         """Return device info."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self._entry_id)},
+            identifiers={(DOMAIN, self._coordinator.device_identifier)},
             name=self._device_name,
             manufacturer="TvOverlay",
             model="Android TV Overlay",
             sw_version=self._coordinator.device_version,
+            configuration_url=f"http://{self._coordinator.client.host}:{self._coordinator.client.port}",
         )
 
     @property
@@ -92,3 +107,85 @@ class TvOverlayNotificationIdsSensor(SensorEntity):
     def _handle_update(self) -> None:
         """Handle notification ID list updates."""
         self.async_write_ha_state()
+
+
+class TvOverlayHostnameSensor(SensorEntity):
+    """Sensor showing device hostname."""
+
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:dns"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        coordinator,
+        entry_id: str,
+        device_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        self._coordinator = coordinator
+        self._entry_id = entry_id
+        self._device_name = device_name
+        self._attr_unique_id = f"{entry_id}_hostname"
+        self._attr_name = "Hostname"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device info."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._coordinator.device_identifier)},
+            name=self._device_name,
+            manufacturer="TvOverlay",
+            model="Android TV Overlay",
+            sw_version=self._coordinator.device_version,
+            configuration_url=f"http://{self._coordinator.client.host}:{self._coordinator.client.port}",
+        )
+
+    @property
+    def native_value(self) -> str:
+        """Return the hostname and port."""
+        return f"{self._coordinator.client.host}:{self._coordinator.client.port}"
+
+
+class TvOverlayResolvedIpSensor(SensorEntity):
+    """Sensor showing resolved IP address."""
+
+    _attr_has_entity_name = True
+    _attr_icon = "mdi:ip-network"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(
+        self,
+        coordinator,
+        entry_id: str,
+        device_name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        self._coordinator = coordinator
+        self._entry_id = entry_id
+        self._device_name = device_name
+        self._attr_unique_id = f"{entry_id}_ip_address"
+        self._attr_name = "IP Address"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device info."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._coordinator.device_identifier)},
+            name=self._device_name,
+            manufacturer="TvOverlay",
+            model="Android TV Overlay",
+            sw_version=self._coordinator.device_version,
+            configuration_url=f"http://{self._coordinator.client.host}:{self._coordinator.client.port}",
+        )
+
+    @property
+    def native_value(self) -> str:
+        """Return the resolved IP address and port."""
+        host = self._coordinator.client.host
+        port = self._coordinator.client.port
+        try:
+            resolved_ip = socket.gethostbyname(host)
+            return f"{resolved_ip}:{port}"
+        except socket.gaierror:
+            return f"{host}:{port}"

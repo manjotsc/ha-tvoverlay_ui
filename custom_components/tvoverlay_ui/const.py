@@ -3,6 +3,9 @@ from typing import Final
 
 DOMAIN: Final = "tvoverlay_ui"
 
+# Config keys
+CONF_DEVICE_IDENTIFIER: Final = "device_identifier"
+
 # Defaults
 DEFAULT_PORT: Final = 5001
 DEFAULT_NAME: Final = "TvOverlay"
@@ -61,6 +64,7 @@ SERVICE_CLEAR_FIXED: Final = "clear_fixed"
 
 # Attribute keys for services
 ATTR_DEVICE_ID: Final = "device_id"
+ATTR_TARGET: Final = "target"
 ATTR_HOST: Final = "host"
 ATTR_TITLE: Final = "title"
 ATTR_MESSAGE: Final = "message"

@@ -3,12 +3,19 @@ notify:
   description: Send a notification to a TvOverlay device.
   fields:
     device_id:
-      name: Device
-      description: Select a configured TvOverlay device.
+      name: Device (Dropdown)
+      description: Select a device from dropdown. Note - this ID changes if you re-add the integration.
       required: false
       selector:
         device:
           integration: tvoverlay_ui
+    target:
+      name: Device Identifier (Stable)
+      description: Enter your stable Device Identifier (e.g., living_room_tv). This stays the same even after re-adding the integration. Recommended for automations.
+      required: false
+      example: "living_room_tv"
+      selector:
+        text:
     host:
       name: Host
       description: Manual host:port (e.g., 192.168.1.100:5001). Use this if device is not configured.
@@ -109,12 +116,19 @@ notify_fixed:
   description: Send a persistent fixed notification to a TvOverlay device.
   fields:
     device_id:
-      name: Device
-      description: Select a configured TvOverlay device.
+      name: Device (Dropdown)
+      description: Select a device from dropdown. Note - this ID changes if you re-add the integration.
       required: false
       selector:
         device:
           integration: tvoverlay_ui
+    target:
+      name: Device Identifier (Stable)
+      description: Enter your stable Device Identifier (e.g., living_room_tv). This stays the same even after re-adding the integration. Recommended for automations.
+      required: false
+      example: "living_room_tv"
+      selector:
+        text:
     host:
       name: Host
       description: Manual host:port (e.g., 192.168.1.100:5001). Use this if device is not configured.
@@ -207,12 +221,19 @@ clear_fixed:
   description: Clear a fixed notification by setting it invisible.
   fields:
     device_id:
-      name: Device
-      description: Select a configured TvOverlay device.
+      name: Device (Dropdown)
+      description: Select a device from dropdown. Note - this ID changes if you re-add the integration.
       required: false
       selector:
         device:
           integration: tvoverlay_ui
+    target:
+      name: Device Identifier (Stable)
+      description: Enter your stable Device Identifier (e.g., living_room_tv). This stays the same even after re-adding the integration. Recommended for automations.
+      required: false
+      example: "living_room_tv"
+      selector:
+        text:
     host:
       name: Host
       description: Manual host:port (e.g., 192.168.1.100:5001). Use this if device is not configured.

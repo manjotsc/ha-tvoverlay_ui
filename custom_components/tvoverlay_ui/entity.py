@@ -32,9 +32,10 @@ class TvOverlayEntity(CoordinatorEntity["TvOverlayCoordinator"]):
     def device_info(self) -> DeviceInfo:
         """Return device info."""
         return DeviceInfo(
-            identifiers={(DOMAIN, self._entry_id)},
+            identifiers={(DOMAIN, self.coordinator.device_identifier)},
             name=self._device_name,
             manufacturer="TvOverlay",
             model="Android TV Overlay",
             sw_version=self.coordinator.device_version,
+            configuration_url=f"http://{self.coordinator.client.host}:{self.coordinator.client.port}",
         )

@@ -38,8 +38,10 @@ from .const import (
     ATTR_SMALL_ICON,
     ATTR_SMALL_ICON_COLOR,
     ATTR_SOURCE,
+    ATTR_TARGET,
     ATTR_TITLE,
     ATTR_VISIBLE,
+    CONF_DEVICE_IDENTIFIER,
     DEFAULT_PORT,
     DOMAIN,
     PLATFORMS,
@@ -124,11 +126,33 @@ def _hex_with_alpha(color: str | None, opacity: int | None) -> str | None:
     return color
 
 
-# Service schemas - device_id or host required
+def _exactly_one_device_target(config: dict) -> dict:
+    """Validate that exactly one of device_id, target, or host is provided."""
+    device_id = config.get(ATTR_DEVICE_ID)
+    target = config.get(ATTR_TARGET)
+    host = config.get(ATTR_HOST)
+
+    # Count how many are provided (non-empty)
+    provided = sum(1 for v in [device_id, target, host] if v)
+
+    if provided == 0:
+        raise vol.Invalid(
+            "You must provide exactly one of: Device (Dropdown), Device Identifier, or Host"
+        )
+    if provided > 1:
+        raise vol.Invalid(
+            "Please use only one of: Device (Dropdown), Device Identifier, or Host. "
+            "Do not fill multiple fields."
+        )
+    return config
+
+
+# Service schemas - exactly one of device_id, target, or host required
 NOTIFY_SCHEMA = vol.Schema(
     vol.All(
         {
             vol.Optional(ATTR_DEVICE_ID): cv.string,
+            vol.Optional(ATTR_TARGET): cv.string,
             vol.Optional(ATTR_HOST): cv.string,
             vol.Optional(ATTR_ID): cv.string,
             vol.Optional(ATTR_TITLE): cv.string,
@@ -142,7 +166,7 @@ NOTIFY_SCHEMA = vol.Schema(
             vol.Optional(ATTR_CORNER): vol.In(VALID_CORNERS),
             vol.Optional(ATTR_DURATION): cv.positive_int,
         },
-        cv.has_at_least_one_key(ATTR_DEVICE_ID, ATTR_HOST),
+        _exactly_one_device_target,
     )
 )
 
@@ -150,6 +174,7 @@ NOTIFY_FIXED_SCHEMA = vol.Schema(
     vol.All(
         {
             vol.Optional(ATTR_DEVICE_ID): cv.string,
+            vol.Optional(ATTR_TARGET): cv.string,
             vol.Optional(ATTR_HOST): cv.string,
             vol.Optional(ATTR_ID): cv.string,
             vol.Optional(ATTR_VISIBLE, default=True): cv.boolean,
@@ -165,7 +190,7 @@ NOTIFY_FIXED_SCHEMA = vol.Schema(
             vol.Optional(ATTR_SHAPE): vol.In(VALID_SHAPES),
             vol.Optional(ATTR_EXPIRATION): cv.string,
         },
-        cv.has_at_least_one_key(ATTR_DEVICE_ID, ATTR_HOST),
+        _exactly_one_device_target,
     )
 )
 
@@ -173,10 +198,11 @@ CLEAR_FIXED_SCHEMA = vol.Schema(
     vol.All(
         {
             vol.Optional(ATTR_DEVICE_ID): cv.string,
+            vol.Optional(ATTR_TARGET): cv.string,
             vol.Optional(ATTR_HOST): cv.string,
             vol.Required(ATTR_ID): cv.string,
         },
-        cv.has_at_least_one_key(ATTR_DEVICE_ID, ATTR_HOST),
+        _exactly_one_device_target,
     )
 )
 
@@ -186,12 +212,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
     port = entry.data[CONF_PORT]
     name = entry.data.get(CONF_NAME, host)
+    # Get device identifier (default to host:port for stable device_id)
+    device_identifier = entry.data.get(CONF_DEVICE_IDENTIFIER, f"{host}:{port}")
 
     session = async_get_clientsession(hass)
     client = TvOverlayApiClient(host, port, session)
 
     # Create coordinator
-    coordinator = TvOverlayCoordinator(hass, client, name)
+    coordinator = TvOverlayCoordinator(hass, client, name, device_identifier)
 
     # Fetch initial data
     await coordinator.async_config_entry_first_refresh()
@@ -210,6 +238,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "name": name,
         "host": host,
         "port": port,
+        "device_identifier": device_identifier,
         "store": store,
         "storage_lock": asyncio.Lock(),
         "notification_ids": notification_ids,
@@ -274,12 +303,15 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         if device is None:
             return None
 
-        # Find the config entry for this device
+        # Find the config entry for this device by matching device_identifier
         for identifier in device.identifiers:
             if identifier[0] == DOMAIN:
-                entry_id = identifier[1]
-                if entry_id in hass.data[DOMAIN]:
-                    return hass.data[DOMAIN][entry_id]["client"]
+                device_identifier = identifier[1]
+                # Search through all entries to find matching device_identifier
+                for entry_data in hass.data[DOMAIN].values():
+                    if isinstance(entry_data, dict):
+                        if entry_data.get("device_identifier") == device_identifier:
+                            return entry_data["client"]
 
         return None
 
@@ -291,15 +323,35 @@ async def _async_register_services(hass: HomeAssistant) -> None:
                     return entry_data["client"]
         return None
 
+    def _get_client_from_device_identifier(identifier: str) -> TvOverlayApiClient | None:
+        """Get the API client by device_identifier."""
+        for entry_data in hass.data[DOMAIN].values():
+            if isinstance(entry_data, dict):
+                if entry_data.get("device_identifier") == identifier:
+                    return entry_data["client"]
+        return None
+
     def _get_client(call_data: dict[str, Any]) -> TvOverlayApiClient:
         """Get the API client from service call data."""
+        target = call_data.get(ATTR_TARGET)
         device_id = call_data.get(ATTR_DEVICE_ID)
         host = call_data.get(ATTR_HOST)
 
-        # Try device_id first (from device selector)
+        # Try target first (stable device_identifier - recommended)
+        if target:
+            client = _get_client_from_device_identifier(target)
+            if client:
+                return client
+
+        # Try device_id (from device selector dropdown)
         if device_id:
             # Try as device registry ID
             client = _get_client_from_device_id(device_id)
+            if client:
+                return client
+
+            # Try as our stable device_identifier (fallback)
+            client = _get_client_from_device_identifier(device_id)
             if client:
                 return client
 

@@ -23,6 +23,7 @@ class TvOverlayCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         hass: HomeAssistant,
         client: TvOverlayApiClient,
         device_name: str,
+        device_identifier: str | None = None,
     ) -> None:
         """Initialize the coordinator."""
         super().__init__(
@@ -33,8 +34,14 @@ class TvOverlayCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.client = client
         self._device_name = device_name
+        self._device_identifier = device_identifier or f"{client.host}:{client.port}"
         self._device_version: str | None = None
         self._available = True
+
+    @property
+    def device_identifier(self) -> str:
+        """Return the device identifier for stable device_id."""
+        return self._device_identifier
 
     @property
     def device_version(self) -> str | None:

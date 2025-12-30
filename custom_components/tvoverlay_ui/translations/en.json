@@ -7,18 +7,21 @@
         "data": {
           "host": "Host",
           "port": "Port",
-          "name": "Device Name"
+          "name": "Device Name",
+          "device_identifier": "Device Identifier"
         },
         "data_description": {
           "host": "IP address or hostname of the TvOverlay device",
           "port": "Port number (default: 5001)",
-          "name": "Friendly name for this device"
+          "name": "Friendly name for this device",
+          "device_identifier": "A stable unique ID used in automations and service calls. This ID remains the same even if you delete and re-add the integration, preventing broken automations. Leave empty to auto-generate from device name. Only lowercase letters, numbers, and underscores allowed."
         }
       }
     },
     "error": {
       "cannot_connect": "Cannot connect to TvOverlay device. Please check the host and port.",
-      "unknown": "An unexpected error occurred."
+      "unknown": "An unexpected error occurred.",
+      "invalid_identifier": "Invalid identifier. Use only lowercase letters, numbers, and underscores."
     },
     "abort": {
       "already_configured": "This device is already configured."
@@ -31,13 +34,18 @@
         "description": "Update the connection settings for your TvOverlay device.",
         "data": {
           "host": "Host",
-          "port": "Port"
+          "port": "Port",
+          "device_identifier": "Device Identifier"
+        },
+        "data_description": {
+          "device_identifier": "A stable unique ID used in automations and service calls. Changing this will break existing automations that reference this device. Only lowercase letters, numbers, and underscores allowed."
         }
       }
     },
     "error": {
       "cannot_connect": "Cannot connect to TvOverlay device. Please check the host and port.",
-      "unknown": "An unexpected error occurred."
+      "unknown": "An unexpected error occurred.",
+      "invalid_identifier": "Invalid identifier. Use only lowercase letters, numbers, and underscores."
     }
   },
   "entity": {
@@ -80,6 +88,12 @@
     "sensor": {
       "active_notification_ids": {
         "name": "Active Fixed Notifications"
+      },
+      "hostname": {
+        "name": "Hostname"
+      },
+      "ip_address": {
+        "name": "IP Address"
       }
     },
     "select": {
@@ -108,8 +122,12 @@
       "description": "Send a notification to a TvOverlay device.",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "Select a configured TvOverlay device."
+          "name": "Device (Dropdown)",
+          "description": "Select a device from dropdown. Note: This ID changes if you delete and re-add the integration."
+        },
+        "target": {
+          "name": "Device Identifier (Stable)",
+          "description": "Enter your stable Device Identifier (e.g., living_room_tv). This stays the same even after re-adding the integration. Recommended for automations."
         },
         "host": {
           "name": "Host",
@@ -158,8 +176,12 @@
       "description": "Send a persistent fixed notification to a TvOverlay device.",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "Select a configured TvOverlay device."
+          "name": "Device (Dropdown)",
+          "description": "Select a device from dropdown. Note: This ID changes if you delete and re-add the integration."
+        },
+        "target": {
+          "name": "Device Identifier (Stable)",
+          "description": "Enter your stable Device Identifier (e.g., living_room_tv). This stays the same even after re-adding the integration. Recommended for automations."
         },
         "host": {
           "name": "Host",
@@ -203,7 +225,7 @@
         },
         "expiration": {
           "name": "Expiration",
-          "description": "When to expire (duration like 1h30m, or seconds)."
+          "description": "When to expire. Examples: 1h, 30m, 1h30m, 3600 (seconds)"
         }
       }
     },
@@ -212,8 +234,12 @@
       "description": "Clear a fixed notification by setting it invisible.",
       "fields": {
         "device_id": {
-          "name": "Device",
-          "description": "Select a configured TvOverlay device."
+          "name": "Device (Dropdown)",
+          "description": "Select a device from dropdown. Note: This ID changes if you delete and re-add the integration."
+        },
+        "target": {
+          "name": "Device Identifier (Stable)",
+          "description": "Enter your stable Device Identifier (e.g., living_room_tv). This stays the same even after re-adding the integration. Recommended for automations."
         },
         "host": {
           "name": "Host",
