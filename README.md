@@ -43,6 +43,7 @@ Copy `custom_components/tvoverlay_ui` to your HA config directory and restart.
 1. **Settings** → **Devices & Services** → **Add Integration**
 2. Search **TvOverlay UI**
 3. Enter device IP, port (default: 5001), and name
+4. Optionally set a **Device Identifier** (e.g., `living_room_tv`) for stable automations
 
 ---
 
@@ -63,8 +64,36 @@ Copy `custom_components/tvoverlay_ui` to your HA config directory and restart.
 | **Switches** | Display Clock, Display Notifications, Display Fixed Notifications, Pixel Shift, Debug Mode |
 | **Sliders** | Clock Visibility, Overlay Visibility, Fixed Notifications Visibility, Notification Duration |
 | **Selects** | Hot Corner, Default Shape |
-| **Sensors** | Active Fixed Notifications |
+| **Sensors** | Active Fixed Notifications, Hostname, IP Address |
 | **Binary Sensors** | Connectivity (online/offline status) |
+
+### Stable Device Identifier
+
+> [!TIP]
+> **Prevent broken automations!** Set a **Device Identifier** (e.g., `living_room_tv`) during setup. This ID stays the same even if you delete and re-add the integration.
+
+- Set during initial setup or via **Configure** button
+- Use lowercase letters, numbers, and underscores only
+- Auto-generated from device name if left empty
+
+### Service Call Targeting
+
+Three ways to target devices in service calls:
+
+| Field | Description | Recommended |
+|:------|:------------|:-----------:|
+| `device_id` | Dropdown selector | No (changes on re-add) |
+| `target` | Stable device identifier | Yes |
+| `host` | Manual `host:port` | For unconfigured devices |
+
+**Example using stable identifier:**
+```yaml
+service: tvoverlay_ui.notify
+data:
+  target: living_room_tv
+  title: "Hello"
+  message: "World"
+```
 
 ---
 
