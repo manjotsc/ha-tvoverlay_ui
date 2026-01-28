@@ -5,6 +5,7 @@ import asyncio
 import logging
 import re
 from typing import Any
+from urllib.parse import urlparse
 
 import voluptuous as vol
 
@@ -94,6 +95,27 @@ COLOR_NAMES: dict[str, str] = {
 # Default opacity for background colors
 DEFAULT_OPACITY = 40
 
+# Valid URL schemes for media URLs (including RTSP for camera streams)
+VALID_MEDIA_URL_SCHEMES = {"http", "https", "rtsp", "rtsps"}
+
+
+def media_url(value: Any) -> str:
+    """Validate a media URL (supports http, https, rtsp, rtsps schemes)."""
+    if value is None:
+        raise vol.Invalid("URL cannot be None")
+    url_str = str(value).strip()
+    if not url_str:
+        raise vol.Invalid("URL cannot be empty")
+    parsed = urlparse(url_str)
+    if parsed.scheme not in VALID_MEDIA_URL_SCHEMES:
+        raise vol.Invalid(
+            f"Invalid URL scheme '{parsed.scheme}'. "
+            f"Supported schemes: {', '.join(sorted(VALID_MEDIA_URL_SCHEMES))}"
+        )
+    if not parsed.netloc:
+        raise vol.Invalid("URL must have a valid host")
+    return url_str
+
 
 def _normalize_hex_color(color: str | None) -> str | None:
     """Normalize color to hex string (accepts hex or color names)."""
@@ -162,7 +184,7 @@ NOTIFY_SCHEMA = vol.Schema(
             vol.Optional(ATTR_SMALL_ICON_COLOR): cv.string,
             vol.Optional(ATTR_LARGE_ICON): cv.string,
             vol.Optional(ATTR_MEDIA_TYPE): vol.In(["none", "image", "video"]),
-            vol.Optional(ATTR_MEDIA_URL): cv.url,
+            vol.Optional(ATTR_MEDIA_URL): media_url,
             vol.Optional(ATTR_CORNER): vol.In(VALID_CORNERS),
             vol.Optional(ATTR_DURATION): cv.positive_int,
         },
