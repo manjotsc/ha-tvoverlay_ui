@@ -141,23 +141,23 @@
           "name": "Message",
           "description": "The notification message."
         },
-        "smallIcon": {
+        "small_icon": {
           "name": "Small Icon",
           "description": "MDI icon or image URL. Local paths not supported - must be full URL. Examples: mdi:bell, http://192.168.1.100:8123/local/icon.png"
         },
-        "smallIconColor": {
+        "small_icon_color": {
           "name": "Small Icon Color",
           "description": "Color for the small icon. Use hex (#FF5500) or color name (red, blue, green, etc.)."
         },
-        "largeIcon": {
+        "large_icon": {
           "name": "Large Icon",
           "description": "MDI icon or image URL. Local paths not supported - must be full URL. Examples: mdi:account, http://192.168.1.100:8123/local/icon.png"
         },
-        "mediaType": {
+        "media_type": {
           "name": "Media Type",
           "description": "Type of media to display."
         },
-        "mediaUrl": {
+        "media_url": {
           "name": "Media URL",
           "description": "Local paths not supported - must be full URL. Image: http://192.168.1.100:8123/local/image.jpg. Video: rtsp://IP/stream or .m3u8/.mpd URL."
         },
@@ -199,23 +199,23 @@
           "name": "Message",
           "description": "The notification message."
         },
-        "messageColor": {
+        "message_color": {
           "name": "Message Color",
           "description": "Color for the message text. Use hex (#FFFFFF) or color name (white, red, etc.)."
         },
-        "iconColor": {
+        "icon_color": {
           "name": "Icon Color",
           "description": "Color for the icon. Use hex (#FFFFFF) or color name (white, red, etc.)."
         },
-        "borderColor": {
+        "border_color": {
           "name": "Border Color",
           "description": "Color for the border. Use hex (#FFFFFF) or color name (white, red, etc.)."
         },
-        "backgroundColor": {
+        "background_color": {
           "name": "Background Color",
           "description": "Color for the background. Use hex (#000000) or color name (black, gray, etc.)."
         },
-        "backgroundOpacity": {
+        "background_opacity": {
           "name": "Background Opacity",
           "description": "Opacity for the background (0-100%)."
         },

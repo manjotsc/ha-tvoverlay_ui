@@ -527,16 +527,16 @@ def _build_notification_data(
     elif defaults.get("hot_corner"):
         payload["corner"] = defaults["hot_corner"]
 
-    # Small icon
+    # Small icon (API expects camelCase)
     if ATTR_SMALL_ICON in data and data[ATTR_SMALL_ICON]:
         payload["smallIcon"] = data[ATTR_SMALL_ICON]
 
-    # Small icon color (hex string or color name)
+    # Small icon color (hex string or color name, API expects camelCase)
     small_icon_color = _normalize_hex_color(data.get(ATTR_SMALL_ICON_COLOR))
     if small_icon_color:
         payload["smallIconColor"] = small_icon_color
 
-    # Large icon
+    # Large icon (API expects camelCase)
     if ATTR_LARGE_ICON in data and data[ATTR_LARGE_ICON]:
         payload["largeIcon"] = data[ATTR_LARGE_ICON]
 
@@ -581,7 +581,7 @@ def _build_fixed_notification_data(
     if ATTR_ICON in data and data[ATTR_ICON]:
         payload["icon"] = data[ATTR_ICON]
 
-    # Colors (hex strings)
+    # Colors (hex strings, API expects camelCase)
     message_color = _normalize_hex_color(data.get(ATTR_MESSAGE_COLOR))
     if message_color:
         payload["messageColor"] = message_color
@@ -594,7 +594,7 @@ def _build_fixed_notification_data(
     if border_color:
         payload["borderColor"] = border_color
 
-    # Background color with opacity (ARGB format)
+    # Background color with opacity (ARGB format, API expects camelCase)
     bg_color = data.get(ATTR_BACKGROUND_COLOR)
     if bg_color:
         bg_opacity = data.get(ATTR_BACKGROUND_OPACITY)

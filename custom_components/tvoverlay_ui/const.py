@@ -77,20 +77,20 @@ ATTR_SHAPE: Final = "shape"
 ATTR_EXPIRATION: Final = "expiration"
 
 # Icon attributes
-ATTR_SMALL_ICON: Final = "smallIcon"
-ATTR_SMALL_ICON_COLOR: Final = "smallIconColor"
-ATTR_LARGE_ICON: Final = "largeIcon"
+ATTR_SMALL_ICON: Final = "small_icon"
+ATTR_SMALL_ICON_COLOR: Final = "small_icon_color"
+ATTR_LARGE_ICON: Final = "large_icon"
 
 # Media attributes
-ATTR_MEDIA_TYPE: Final = "mediaType"
-ATTR_MEDIA_URL: Final = "mediaUrl"
+ATTR_MEDIA_TYPE: Final = "media_type"
+ATTR_MEDIA_URL: Final = "media_url"
 
 # Fixed notification icon attributes
 ATTR_ICON: Final = "icon"
-ATTR_ICON_COLOR: Final = "iconColor"
+ATTR_ICON_COLOR: Final = "icon_color"
 
 # Color attributes
-ATTR_MESSAGE_COLOR: Final = "messageColor"
-ATTR_BORDER_COLOR: Final = "borderColor"
-ATTR_BACKGROUND_COLOR: Final = "backgroundColor"
-ATTR_BACKGROUND_OPACITY: Final = "backgroundOpacity"
+ATTR_MESSAGE_COLOR: Final = "message_color"
+ATTR_BORDER_COLOR: Final = "border_color"
+ATTR_BACKGROUND_COLOR: Final = "background_color"
+ATTR_BACKGROUND_OPACITY: Final = "background_opacity"
