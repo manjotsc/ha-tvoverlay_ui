@@ -169,7 +169,35 @@ def _exactly_one_device_target(config: dict) -> dict:
     return config
 
 
+# Backward compatibility: map old camelCase field names to new snake_case
+CAMEL_TO_SNAKE_MAP: dict[str, str] = {
+    "smallIcon": ATTR_SMALL_ICON,
+    "smallIconColor": ATTR_SMALL_ICON_COLOR,
+    "largeIcon": ATTR_LARGE_ICON,
+    "mediaType": ATTR_MEDIA_TYPE,
+    "mediaUrl": ATTR_MEDIA_URL,
+    "iconColor": ATTR_ICON_COLOR,
+    "messageColor": ATTR_MESSAGE_COLOR,
+    "borderColor": ATTR_BORDER_COLOR,
+    "backgroundColor": ATTR_BACKGROUND_COLOR,
+    "backgroundOpacity": ATTR_BACKGROUND_OPACITY,
+}
+
+
+def _normalize_service_data(config: dict) -> dict:
+    """Normalize camelCase field names to snake_case for backward compatibility."""
+    normalized = dict(config)
+    for camel, snake in CAMEL_TO_SNAKE_MAP.items():
+        if camel in normalized:
+            # Only copy if snake_case version isn't already set
+            if snake not in normalized:
+                normalized[snake] = normalized[camel]
+            del normalized[camel]
+    return normalized
+
+
 # Service schemas - exactly one of device_id, target, or host required
+# Accepts both snake_case (new) and camelCase (legacy) field names for backward compatibility
 NOTIFY_SCHEMA = vol.Schema(
     vol.All(
         {
@@ -180,14 +208,22 @@ NOTIFY_SCHEMA = vol.Schema(
             vol.Optional(ATTR_TITLE): cv.string,
             vol.Optional(ATTR_MESSAGE): cv.string,
             vol.Optional(ATTR_SOURCE): cv.string,
+            # New snake_case field names
             vol.Optional(ATTR_SMALL_ICON): cv.string,
             vol.Optional(ATTR_SMALL_ICON_COLOR): cv.string,
             vol.Optional(ATTR_LARGE_ICON): cv.string,
             vol.Optional(ATTR_MEDIA_TYPE): vol.In(["none", "image", "video"]),
             vol.Optional(ATTR_MEDIA_URL): media_url,
+            # Legacy camelCase field names (backward compatibility)
+            vol.Optional("smallIcon"): cv.string,
+            vol.Optional("smallIconColor"): cv.string,
+            vol.Optional("largeIcon"): cv.string,
+            vol.Optional("mediaType"): vol.In(["none", "image", "video"]),
+            vol.Optional("mediaUrl"): media_url,
             vol.Optional(ATTR_CORNER): vol.In(VALID_CORNERS),
             vol.Optional(ATTR_DURATION): cv.positive_int,
         },
+        _normalize_service_data,
         _exactly_one_device_target,
     )
 )
@@ -202,6 +238,7 @@ NOTIFY_FIXED_SCHEMA = vol.Schema(
             vol.Optional(ATTR_VISIBLE, default=True): cv.boolean,
             vol.Optional(ATTR_ICON): cv.string,
             vol.Optional(ATTR_MESSAGE): cv.string,
+            # New snake_case field names
             vol.Optional(ATTR_MESSAGE_COLOR): cv.string,
             vol.Optional(ATTR_ICON_COLOR): cv.string,
             vol.Optional(ATTR_BORDER_COLOR): cv.string,
@@ -209,9 +246,18 @@ NOTIFY_FIXED_SCHEMA = vol.Schema(
             vol.Optional(ATTR_BACKGROUND_OPACITY): vol.All(
                 vol.Coerce(int), vol.Range(min=0, max=100)
             ),
+            # Legacy camelCase field names (backward compatibility)
+            vol.Optional("messageColor"): cv.string,
+            vol.Optional("iconColor"): cv.string,
+            vol.Optional("borderColor"): cv.string,
+            vol.Optional("backgroundColor"): cv.string,
+            vol.Optional("backgroundOpacity"): vol.All(
+                vol.Coerce(int), vol.Range(min=0, max=100)
+            ),
             vol.Optional(ATTR_SHAPE): vol.In(VALID_SHAPES),
             vol.Optional(ATTR_EXPIRATION): cv.string,
         },
+        _normalize_service_data,
         _exactly_one_device_target,
     )
 )
