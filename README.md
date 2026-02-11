@@ -1,15 +1,15 @@
-<p align="center">
-  <h1 align="center">TvOverlay UI</h1>
-  <p align="center">
-    A Home Assistant integration for <a href="https://github.com/gugutab/TvOverlay">TvOverlay</a>
-    <br />
-    Send notifications and control overlays on your Android TV
-  </p>
-</p>
+<h1 align="center">
+  <br>
+  TvOverlay UI
+  <br>
+</h1>
+
+<h4 align="center">A Home Assistant integration for <a href="https://github.com/gugutab/TvOverlay">TvOverlay</a> — send notifications and control overlays on your Android TV.</h4>
 
 <p align="center">
   <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge" alt="HACS"></a>
   <a href="https://github.com/manjotsc/ha-tvoverlay_ui/releases"><img src="https://img.shields.io/github/v/release/manjotsc/ha-tvoverlay_ui?style=for-the-badge" alt="Release"></a>
+  <a href="https://github.com/manjotsc/ha-tvoverlay_ui/stargazers"><img src="https://img.shields.io/github/stars/manjotsc/ha-tvoverlay_ui?style=for-the-badge" alt="Stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/manjotsc/ha-tvoverlay_ui?style=for-the-badge" alt="License"></a>
 </p>
 
@@ -19,47 +19,38 @@
   </a>
 </p>
 
+<p align="center">
+  <a href="#installation">Installation</a> &bull;
+  <a href="#setup">Setup</a> &bull;
+  <a href="#features">Features</a> &bull;
+  <a href="#services">Services</a> &bull;
+  <a href="#limitations">Limitations</a>
+</p>
+
 ---
 
-## Overview
-
-**TvOverlay UI** brings the power of [TvOverlay](https://github.com/gugutab/TvOverlay) to Home Assistant with a clean, UI-friendly experience. No YAML required.
-
-> **Credit**: This integration is built for the TvOverlay Android TV app by [@gugutab](https://github.com/gugutab)
-
----
+> [!NOTE]
+> This integration is built for the [TvOverlay](https://github.com/gugutab/TvOverlay) Android TV app by [@gugutab](https://github.com/gugutab).
 
 ## Installation
 
 ### HACS (Recommended)
 
 1. Open **HACS** → Search **TvOverlay UI**
-2. Install → Restart HA
+2. Install → Restart Home Assistant
 
 ### Manual
 
-Copy `custom_components/tvoverlay_ui` to your HA config directory and restart.
-
----
+Copy `custom_components/tvoverlay_ui` to your Home Assistant config directory and restart.
 
 ## Setup
 
-1. **Settings** → **Devices & Services** → **Add Integration**
-2. Search **TvOverlay UI**
-3. Enter device IP, port (default: 5001), and name
+1. Go to **Settings** → **Devices & Services** → **Add Integration**
+2. Search for **TvOverlay UI**
+3. Enter device IP, port (default: `5001`), and name
 4. Optionally set a **Device Identifier** (e.g., `living_room_tv`) for stable automations
 
----
-
 ## Features
-
-### Services
-
-| Service | Description |
-|:--------|:------------|
-| `tvoverlay_ui.notify` | Send a notification |
-| `tvoverlay_ui.notify_fixed` | Create a persistent widget (ID required) |
-| `tvoverlay_ui.clear_fixed` | Remove a widget by ID |
 
 ### Controls
 
@@ -76,21 +67,29 @@ Copy `custom_components/tvoverlay_ui` to your HA config directory and restart.
 > [!TIP]
 > **Prevent broken automations!** Set a **Device Identifier** (e.g., `living_room_tv`) during setup. This ID stays the same even if you delete and re-add the integration.
 
-- Set during initial setup or via **Configure** button
+- Set during initial setup or via the **Configure** button
 - Use lowercase letters, numbers, and underscores only
 - Auto-generated from device name if left empty
 
-### Service Call Targeting
+## Services
 
-Three ways to target devices in service calls:
+| Service | Description |
+|:--------|:------------|
+| `tvoverlay_ui.notify` | Send a notification |
+| `tvoverlay_ui.notify_fixed` | Create a persistent widget (ID required) |
+| `tvoverlay_ui.clear_fixed` | Remove a widget by ID |
+
+### Targeting Devices
 
 | Field | Description | Recommended |
 |:------|:------------|:-----------:|
+| `target` | Stable device identifier | **Yes** |
 | `device_id` | Dropdown selector | No (changes on re-add) |
-| `target` | Stable device identifier | Yes |
 | `host` | Manual `host:port` | For unconfigured devices |
 
-**Example using stable identifier:**
+<details>
+<summary><strong>Example service call</strong></summary>
+
 ```yaml
 service: tvoverlay_ui.notify
 data:
@@ -99,28 +98,23 @@ data:
   message: "World"
 ```
 
----
+</details>
 
 ## Limitations
+
+> [!WARNING]
+> Entity states are polled from the device every 30 seconds.
 
 | Area | Limitation |
 |:-----|:-----------|
 | **Media** | Local paths not supported — use full URLs only |
-| **Video** | Only RTSP, HLS (.m3u8), DASH (.mpd) — no MP4 |
+| **Video** | Only RTSP, HLS (`.m3u8`), DASH (`.mpd`) — no MP4 |
 | **Tracking** | Only tracks fixed notifications created via Home Assistant |
-
-> **Note**: Entity states are polled from the device every 30 seconds.
-
----
 
 ## Contributing
 
-Pull requests welcome.
-
----
+Pull requests are welcome! Feel free to open an [issue](https://github.com/manjotsc/ha-tvoverlay_ui/issues) for bugs or feature requests.
 
 ## License
 
-[MIT License](LICENSE)
-
----
+[MIT](LICENSE)
