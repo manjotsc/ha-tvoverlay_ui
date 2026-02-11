@@ -14,8 +14,8 @@
 </p>
 
 <p align="center">
-  <a href="https://my.home-assistant.io/redirect/hacs_open/">
-    <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open HACS in your Home Assistant instance." />
+  <a href="https://my.home-assistant.io/redirect/hacs_repository/?owner=manjotsc&repository=ha-tvoverlay_ui">
+    <img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open your Home Assistant instance and open a repository inside the Home Assistant Community Store." />
   </a>
 </p>
 
