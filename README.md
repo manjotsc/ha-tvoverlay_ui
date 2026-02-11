@@ -9,8 +9,8 @@
 
 <p align="center">
   <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge" alt="HACS"></a>
-  <a href="https://github.com/manjotsc/ha-tvoverlay/releases"><img src="https://img.shields.io/github/v/release/manjotsc/ha-tvoverlay?style=for-the-badge" alt="Release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/manjotsc/ha-tvoverlay?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/manjotsc/ha-tvoverlay_ui/releases"><img src="https://img.shields.io/github/v/release/manjotsc/ha-tvoverlay_ui?style=for-the-badge" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/manjotsc/ha-tvoverlay_ui?style=for-the-badge" alt="License"></a>
 </p>
 
 <p align="center">
