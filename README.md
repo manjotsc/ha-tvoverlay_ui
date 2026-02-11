@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge" alt="HACS"></a>
+  <a href="https://github.com/hacs/integration"><img src="https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge" alt="HACS"></a>
   <a href="https://github.com/manjotsc/ha-tvoverlay/releases"><img src="https://img.shields.io/github/v/release/manjotsc/ha-tvoverlay?style=for-the-badge" alt="Release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/manjotsc/ha-tvoverlay?style=for-the-badge" alt="License"></a>
 </p>
@@ -33,10 +33,8 @@
 
 ### HACS (Recommended)
 
-1. Open **HACS** → Click ⋮ → **Custom repositories**
-2. Add: `https://github.com/manjotsc/ha-tvoverlay`
-3. Category: **Integration**
-4. Search **TvOverlay UI** → Install → Restart HA
+1. Open **HACS** → Search **TvOverlay UI**
+2. Install → Restart HA
 
 ### Manual
 
