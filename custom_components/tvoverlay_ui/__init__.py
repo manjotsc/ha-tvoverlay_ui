@@ -16,6 +16,7 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, device_registry as dr
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.storage import Store
+from homeassistant.helpers.typing import ConfigType
 
 from .api import TvOverlayApiClient
 from .const import (
@@ -57,6 +58,9 @@ from .const import (
 from .coordinator import TvOverlayCoordinator
 
 _LOGGER = logging.getLogger(__name__)
+
+# This integration is configured via config entries only.
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 # Hex color validation pattern
 HEX_COLOR_PATTERN = re.compile(r"^#?[0-9A-Fa-f]{6}$")
@@ -275,6 +279,19 @@ CLEAR_FIXED_SCHEMA = vol.Schema(
 )
 
 
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up the TvOverlay integration.
+
+    Services are registered here (not in async_setup_entry) so they are
+    available regardless of whether any device is reachable. This ensures
+    automations referencing these actions validate even when devices are
+    offline during Home Assistant startup.
+    """
+    hass.data.setdefault(DOMAIN, {})
+    await _async_register_services(hass)
+    return True
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up TvOverlay from a config entry."""
     host = entry.data[CONF_HOST]
@@ -318,9 +335,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Set up platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    # Register services if not already registered
-    if not hass.services.has_service(DOMAIN, SERVICE_NOTIFY):
-        await _async_register_services(hass)
+    # Services are registered globally in async_setup(), independent of
+    # device availability.
 
     # Register update listener for options changes
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
@@ -338,13 +354,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
     if unload_ok:
-        hass.data[DOMAIN].pop(entry.entry_id)
+        hass.data[DOMAIN].pop(entry.entry_id, None)
 
-        # Unregister services if no more entries
-        if not hass.data[DOMAIN]:
-            hass.services.async_remove(DOMAIN, SERVICE_NOTIFY)
-            hass.services.async_remove(DOMAIN, SERVICE_NOTIFY_FIXED)
-            hass.services.async_remove(DOMAIN, SERVICE_CLEAR_FIXED)
+        # Services are intentionally left registered. They are owned by
+        # async_setup() and live for the lifetime of Home Assistant, so that
+        # automations referencing these actions keep validating even while all
+        # entries are unloaded or retrying setup.
 
     return unload_ok
 
@@ -376,7 +391,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
             if identifier[0] == DOMAIN:
                 device_identifier = identifier[1]
                 # Search through all entries to find matching device_identifier
-                for entry_data in hass.data[DOMAIN].values():
+                for entry_data in hass.data.get(DOMAIN, {}).values():
                     if isinstance(entry_data, dict):
                         if entry_data.get("device_identifier") == device_identifier:
                             return entry_data["client"]
@@ -385,7 +400,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
 
     def _get_client_from_name_or_host(name_or_host: str) -> TvOverlayApiClient | None:
         """Get the API client by name or host."""
-        for entry_data in hass.data[DOMAIN].values():
+        for entry_data in hass.data.get(DOMAIN, {}).values():
             if isinstance(entry_data, dict):
                 if entry_data.get("name") == name_or_host or entry_data.get("host") == name_or_host:
                     return entry_data["client"]
@@ -393,7 +408,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
 
     def _get_client_from_device_identifier(identifier: str) -> TvOverlayApiClient | None:
         """Get the API client by device_identifier."""
-        for entry_data in hass.data[DOMAIN].values():
+        for entry_data in hass.data.get(DOMAIN, {}).values():
             if isinstance(entry_data, dict):
                 if entry_data.get("device_identifier") == identifier:
                     return entry_data["client"]
@@ -432,7 +447,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         if host:
             # Check if it matches a configured device
             parsed_host, parsed_port = _parse_host_port(host)
-            for entry_data in hass.data[DOMAIN].values():
+            for entry_data in hass.data.get(DOMAIN, {}).values():
                 if isinstance(entry_data, dict):
                     if entry_data.get("host") == parsed_host and entry_data.get("port") == parsed_port:
                         return entry_data["client"]
@@ -448,7 +463,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
 
     def _get_entry_data_from_client(client: TvOverlayApiClient) -> dict[str, Any] | None:
         """Get the entry data for a client."""
-        for entry_data in hass.data[DOMAIN].values():
+        for entry_data in hass.data.get(DOMAIN, {}).values():
             if isinstance(entry_data, dict) and entry_data.get("client") is client:
                 return entry_data
         return None
